@@ -1,4 +1,4 @@
-#+TITLE: rextract - a library for extract data from strings
+#+TITLE: rextract - a library for extracting data from strings
 
 * About
 Warning: This is a work-in-progress (WIP) and the interface is likely to undergo
