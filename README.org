@@ -1,0 +1,123 @@
+#+TITLE: rextract - a library for extract data from strings
+
+* About
+Warning: This is a work-in-progress (WIP) and the interface is likely to undergo
+some changes, which may be drastic. This package is meant to provide a library
+for extracting structured data from strings using regular expressions with an
+easy to use interface.
+** Motivation
+I wanted to parse the output of a =git status --porcelain=2= and to have a good
+interface for doing so. The reason being is that every type of status line has a
+different format. This came out of those efforts
+
+* Examples
+These are the highlights
+** =rextract-groups=
+The main function that does the heavy lifting is =rextract-groups=, here are some increasingly complex examples
+#+BEGIN_SRC elisp
+;; Basic:
+(rextract-groups "The quick (brown) fox jumped over* the lazy dog."
+                 (rx line-start
+                     "The "
+                     (group (+ (not space)))
+                     " ("
+                     (group (+ (not ")")))
+                     (+ (not "*"))
+                     "* "
+                     (group (* any))
+                     line-end) ;; => "^The \\([^[:space:]]+\\) (\\([^)]+\\)[^*]+\\* \\(.*\\)$"
+                 )
+;; => ("quick" "brown" "the lazy dog")
+
+;; With labels:
+(rextract-groups "The quick (brown) fox jumped over* the lazy dog."
+                 "^The \\([^[:space:]]+\\) (\\([^)]+\\)[^*]+\\* \\(.*\\)$" ;; Don't need to use (rx ...) if you don't want to
+                 '(:speed 1 :color 1 :jumped 1))
+;; => (:speed "quick" :color "brown" :jumped "the lazy dog")
+
+;; More complex:
+(cl-loop for source-string in '("The quick (brown) fox jumped over* the lazy dog."
+                                "The lumbering (red) fox jumped over* the hard working cow."
+                                "The glacial (blue) sloth jumped over* the other sloth.")
+         with pattern = (rx line-start
+                            "The "
+                            (group (+ (not space)))
+                            " ("
+                            (group (+ (not ")")))
+                            ") "
+                            (group-n 3 (+ (not space)))
+                            (+ (not "*"))
+                            "* "
+                            (group-n 5 (* any)
+                                     " "
+                                     (group-n 4 (+ (not ".")))
+                                     ".")
+                            line-end)
+         collect
+         (rextract-groups source-string pattern '(:speed 1 :color 1 :animals 2 :jumped 1))
+         )
+;; => ((:speed "quick" :color "brown" :animals ("fox" "dog") :jumped "the lazy dog.")
+;;     (:speed "lumbering" :color "red" :animals ("fox" "cow") :jumped "the hard working cow.")
+;;     (:speed "glacial" :color "blue" :animals ("sloth" "sloth") :jumped "the other sloth."))
+#+END_SRC
+** =rextract-fields=
+A lot of data might have a simpler format and all you want to do is extract it
+based on a field-terminator this function is intended to provide a nice
+interface for that.
+
+#+BEGIN_SRC elisp
+;; Very Basic
+(rextract-fields "one two three" 3)
+;; => ("one" "two" "three")
+
+;; Using another field terminator
+(rextract-fields "one,two,three" 3 ",")
+;; => ("one" "two" "three")
+
+;; Giving the fields labels (these work the same way as before)
+(rextract-fields "1,2,3,4,5"
+                 '(:one 1 :two 1 :three: 3)
+                 ",")
+;; => (:one "1" :two "2" :three ("3" "4" "5"))
+
+;; Regexp field terminator
+(rextract-fields "1/2/3/4.5-6+++21"
+                 '(:one 1 :two 1 :three: 3 :four 1 :five 1)
+                 (rx (or "/" "." "-" "+++")))
+;; => (:one "1" :two "2" :three ("3" "4" "5") :four "6" :five "21")
+#+END_SRC
+* Future
+We'll see how much steam I have on this one, but here are some of my ideas / things I need to work on. Feel free to help out if you want, but until I get a license, everything belongs to me and I give no warranty.
+** Work to be done
+- [ ] Add a license
+- [ ] Figure out how the heck melpa works
+- [ ] Update all comments / documentation
+- [ ] Add tests
+- [ ] Give ability to toggle on / off field end-of-line as a field terminator
+- [ ] Add label resolver function that will be able to take less precise label definitions
+      (e.g. allow =(:one :two :three 4)= as a definition for labels)
+- [ ] Add ability for nested label definitions
+      (e.g. allow =(:one :two :three (:four :five :six 2))= as a definition for labels)
+      Ideally, this would be capable of going as deep as you want
+- [ ] Add alternative definition of labels with named groups something like:
+      =(rx (named-group name ...))= or ="\\(?<name> \\)"=, which when 'string-match is run will save off the group names similar to match data
+- [ ] Add buffer versions of existing functions
+- [ ] Add more expansive data reporting (match data locations, full matched pattern returned, etc) -- might just be useful for internal use.
+- [ ] Add ='tail= / ='rest= and ='head= as label definition (grabs the puts the rest)
+- [ ] Add other label definition capabilities.. not sure what this would look like, so this is mostly a placeholder, but as an idea allow specifying literally which matched groups / fields go with which label
+- [ ] Re-imagine the problem (this is my first attempt at solving this problem, so maybe there is a better way)
+- [ ] Possibly use plist as interface
+
+** Package Scope
+Extracting data is one things, but what more can we do here?
+- In-place data transformation
+  - On the basic side, this would just be a simple string replace.
+  - You could swap groups: "one two" -> "two one"
+  - For buffers you could add faces
+  - On the more complicated side things using a lambda or function to determine
+    the value of the field
+- Function generators:
+  - Parsers
+  - Filters
+  - Buffer Modes for filtering
+- more??
