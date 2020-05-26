@@ -23,6 +23,7 @@
 ;;
 ;;; Code:
 
+;;; Variables:
 (defvar rextract-field-terminator-default (rx whitespace)
   "Set the default field terminator for extracting fields.
 
@@ -42,11 +43,13 @@ functions to destructively mutate the STR passed into them. This can be
 useful when you are parsing an inputted string and don't care about it once
 you've transformed it into it's new form.")
 
+;;; RX forms:
 (rx-define repeat-rx (n &rest RXs)
  (eval
   `(: ,@(cl-loop repeat n append
                  `(RXs)))))
 
+;;; Library:
 (defmacro rextract-groups (str regexp &optional labels)
   "Extracts groups from the STR that are defined in REGEXP.
 
