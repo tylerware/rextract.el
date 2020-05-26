@@ -24,10 +24,23 @@
 ;;; Code:
 
 (defvar rextract-field-terminator-default (rx whitespace)
-  "TODO")
+  "Set the default field terminator for extracting fields.
+
+Note that this is not a field seperator, but a terminator. It's a nuance as
+most of the time it will mean the same thing, but on edge cases it matters.
+
+For example, if you have:
+    \"1 2 3 4 5\"
+and you're using a space a the field terminator, then 5 will not be returned
+as field, because it is not followed by a space. However, if we instead use
+the the field terminator with whitespace or line-end then we get all 5 numbers
+as fields that we can extract.")
 
 (defvar rextract-destructive-extract nil
-  "TODO")
+  "If non-nil, this will cause the `rextract-field*' and `rextract-group*'
+functions to destructively mutate the STR passed into them. This can be
+useful when you are parsing an inputted string and don't care about it once
+you've transformed it into it's new form.")
 
 (rx-define repeat-rx (n &rest RXs)
  (eval
