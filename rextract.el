@@ -82,18 +82,24 @@ LABELS, when provided, must be a plist of labels for the groups you want to extr
                     )
          groups))))
 
-(defmacro rextract-group (str regexp)
-  "TODO
-Note: this uses 1-indexing as matched regex groups start at 1"
-  `(rextract-group-n ,str ,regexp 1))
 
 (defmacro rextract-group-n (str regexp n)
-  "TODO
-Note: this uses 1-indexing as matched regex groups start at 1"
-  `(let ((n n))
+  "Extract the N-th REGEXP defined group matched in STR.
+
+See `rextract-groups' for more details."
+  `(let ((n ,n))
      (unless (> n 0)
        (error "Groups count from 1 up, provided value less than 1"))
      (nth (1- n) (rextract-groups ,str ,regexp))))
+
+(defmacro rextract-group (str regexp)
+  "Extract the first REGEXP defined group matched in STR.
+
+This will extract exactly the first matched group defined in REGEXP.
+
+See `rextract-groups' for more details."
+  `(rextract-group-n ,str ,regexp 1))
+
 
 (defmacro rextract-fields (str count-or-labels &optional field-terminator)
   "TODO"
