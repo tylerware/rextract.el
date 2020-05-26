@@ -53,10 +53,10 @@ you've transformed it into it's new form.")
 (defmacro rextract-groups (str regexp &optional labels)
   "Extracts groups from the STR that are defined in REGEXP.
 
-TODO: update --> only destruct if var is set
-Warning: This macro destructively modifies the STR in the calling context.
+If `rextract-destructive-extract' is set then the STR is desctructively modified.
+Specifically, the full matched REGEXP is removed from the STR.
 
-LABELS is a plist of labels with the number of groups that a label goes to."
+LABELS, when provided, must be a plist of labels for the groups you want to extract."
   `(when (string-match ,regexp ,str)
      (let* ((group-match-count (/ (1- (length (match-data))) 2))
             (groups (cl-loop for i from 1 to group-match-count
