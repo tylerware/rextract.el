@@ -78,24 +78,24 @@ Note: this uses 1-indexing as matched regex groups start at 1"
 
 (defmacro rextract-fields (str count-or-labels &optional field-terminator)
   "TODO"
-  (let* ((count-or-labels (eval count-or-labels))
-         (labels (when (sequencep count-or-labels)
-                   count-or-labels))
-         (n (if (sequencep count-or-labels)
-                (cl-loop for x in count-or-labels
-                         sum
-                         (if (numberp x) x 0))
-               count-or-labels)))
-
-  `(let* ((field-terminator (or ,(macroexpand field-terminator) rextract-field-terminator-default)))
+  `(let* ((count-or-labels ,count-or-labels)
+          (labels (when (sequencep count-or-labels)
+                    count-or-labels))
+          (n (if (sequencep count-or-labels)
+                 (cl-loop for x in count-or-labels
+                          sum
+                          (if (numberp x) x 0))
+               count-or-labels))
+          (field-terminator (or ,(macroexpand field-terminator)
+                                rextract-field-terminator-default)))
      (rextract-groups ,str (rx-to-string
                             `(: bos
                               (repeat-rx
-                               ,,n
+                               ,n
                                (group (+? any))
                                (or (regexp ,field-terminator)
                                    line-end))))
-                      ',labels))))
+                      labels)))
 
 (defmacro rextract-field-n (str n &optional field-terminator)
   "TODO"
