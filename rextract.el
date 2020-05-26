@@ -25,7 +25,7 @@
 
 ;;; Variables:
 (defvar rextract-field-terminator-default (rx whitespace)
-  "Set the default field terminator for extracting fields.
+  "The default field terminator for extracting fields, which is a regular expression.
 
 Note that this is not a field seperator, but a terminator. It's a nuance as
 most of the time it will mean the same thing, but on edge cases it matters.
@@ -56,7 +56,14 @@ you've transformed it into it's new form.")
 If `rextract-destructive-extract' is set then the STR is desctructively modified.
 Specifically, the full matched REGEXP is removed from the STR.
 
-LABELS, when provided, must be a plist of labels for the groups you want to extract."
+LABELS, when provided, must be a plist of labels for the groups you want to extract
+and the number of fields you want assigned to that label. For example:
+
+    (:label-1 1 :label-2 4)
+
+In this example, `:label-1' will get the first matched group and `:label-2' will be
+assigned the second through fifth matched groups.
+"
   `(when (string-match ,regexp ,str)
      (let* ((group-match-count (/ (1- (length (match-data))) 2))
             (groups (cl-loop for i from 1 to group-match-count
@@ -86,7 +93,11 @@ LABELS, when provided, must be a plist of labels for the groups you want to extr
 (defmacro rextract-group-n (str regexp n)
   "Extract the N-th REGEXP defined group matched in STR.
 
-See `rextract-groups' for more details."
+See `rextract-groups' for more details.
+
+If `rextract-destructive-extract' is set then the STR is desctructively modified.
+Specifically, the FULL matched REGEXP is removed from the STR.
+"
   `(let ((n ,n))
      (unless (> n 0)
        (error "Groups count from 1 up, provided value less than 1"))
@@ -97,12 +108,28 @@ See `rextract-groups' for more details."
 
 This will extract exactly the first matched group defined in REGEXP.
 
-See `rextract-groups' for more details."
+See `rextract-groups' for more details.
+
+If `rextract-destructive-extract' is set then the STR is desctructively modified.
+Specifically, the FULL matched REGEXP is removed from the STR.
+"
   `(rextract-group-n ,str ,regexp 1))
 
 
 (defmacro rextract-fields (str count-or-labels &optional field-terminator)
-  "TODO"
+  "Extracts fields from STR given a field terminator.
+
+This will only extract as many fields as it is told to extract. COUNT-OR-LABELS
+is how you specify that. Provide a positive integer, n, to extract n fields. You
+can however provide a list of labels, see `rextract-fields' for more details.
+
+The FIELD-TERMINATOR will override the `rextract-field-terminator-default'. This
+should be a regular expression. See `rextract-field-terminator-default' for more
+on this.
+
+If `rextract-destructive-extract' is set then the STR is desctructively modified.
+Specifically, fields matched are removed from the STR.
+"
   `(let* ((count-or-labels ,count-or-labels)
           (labels (when (sequencep count-or-labels)
                     count-or-labels))
@@ -122,14 +149,27 @@ See `rextract-groups' for more details."
                                    line-end))))
                       labels)))
 
+
 (defmacro rextract-field-n (str n &optional field-terminator)
-  "TODO"
+  "Extract the N-th field from matched in STR.
+
+See `rextract-fields' for details on the FIELD-TERMINATOR and general behavior.
+
+If `rextract-destructive-extract' is set then the STR is desctructively modified.
+Specifically, all the fields up to N matched are removed from the STR.
+"
   `(nth ,n (rextract-fields ,str ,(1+ n) ,field-terminator)))
 
-(defmacro rextract-field (str &optional field-terminator)
-  "TODO"
-  `(rextract-field-n ,str 0))
 
+(defmacro rextract-field (str &optional field-terminator)
+  "Extract the first field from matched in STR.
+
+See `rextract-fields' for details on the FIELD-TERMINATOR and general behavior.
+
+If `rextract-destructive-extract' is set then the STR is desctructively modified.
+Specifically, the first matched field is removed from the STR.
+"
+  `(rextract-field-n ,str 0, field-terminator))
 
 
 (provide 'rextract)
