@@ -1,8 +1,5 @@
 ;;; rextract  --- parse data from strings -*- lexical-binding: t; -*-
-;;
-;; Copyright (C) 2020
-;; (liscense coming soon TM)
-;;
+
 ;; Author: Tyler Ware <http://github.com/tylerware>
 ;; Maintainer: Tyler Ware <tyler.ware.777@gmail.com>
 ;; Created: May 22, 2020
