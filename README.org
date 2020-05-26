@@ -89,10 +89,10 @@ interface for that.
 * Future
 We'll see how much steam I have on this one, but here are some of my ideas / things I need to work on. Feel free to help out if you want, but until I get a license, everything belongs to me and I give no warranty.
 ** Work to be done
-- [ ] Add a license
+- [X] Add a license
 - [X] Update all comments / documentation
+- [X] Give ability to toggle on / off field end-of-line as a field terminator
 - [ ] Add tests
-- [ ] Give ability to toggle on / off field end-of-line as a field terminator
 - [ ] Add label resolver function that will be able to take less precise label definitions
       (e.g. allow =(:one :two :three 4)= as a definition for labels)
 - [ ] Figure out how the heck melpa works
