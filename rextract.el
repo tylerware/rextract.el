@@ -74,7 +74,10 @@ Note: this uses 1-indexing as matched regex groups start at 1"
 (defmacro rextract-group-n (str regexp n)
   "TODO
 Note: this uses 1-indexing as matched regex groups start at 1"
-  `(nth (1- ,n) (rextract-groups ,str ,regexp)))
+  `(let ((n n))
+     (unless (> n 0)
+       (error "Groups count from 1 up, provided value less than 1"))
+     (nth (1- n) (rextract-groups ,str ,regexp))))
 
 (defmacro rextract-fields (str count-or-labels &optional field-terminator)
   "TODO"
