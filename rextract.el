@@ -24,7 +24,7 @@
 ;;; Code:
 
 ;;; Variables:
-(defvar rextract-field-terminator-default (rx whitespace)
+(defvar rextract-field-terminator-default (rx (or whitespace line-end))
   "The default field terminator for extracting fields, which is a regular expression.
 
 Note that this is not a field seperator, but a terminator. It's a nuance as
@@ -145,8 +145,7 @@ Specifically, fields matched are removed from the STR.
                               (repeat-rx
                                ,n
                                (group (+? any))
-                               (or (regexp ,field-terminator)
-                                   line-end))))
+                               (regexp ,field-terminator))))
                       labels)))
 
 
